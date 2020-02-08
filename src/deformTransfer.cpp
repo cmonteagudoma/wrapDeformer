@@ -1,30 +1,73 @@
 #include "deformTransfer.h"
+#include <maya/MTypeId.h>
 #include <maya/MFnPlugin.h>
 #include <iostream>
-#include <omp.h>
 
-void* DeformTransfer::creator() { return new DeformTransfer; }
 
-MStatus DeformTransfer::doIt(const MArgList& argList) {
+MTypeId DeformTransfer::id(0x8000c);
 
-#pragma omp parallel
-    for (unsigned i=0; i<1000; i++) {
-        MGlobal::displayInfo("Deform Transfer is here! It's fine");
-    }
 
-    return MS::kSuccess;
+DeformTransfer::DeformTransfer() = default;
+
+
+DeformTransfer::~DeformTransfer() = default;
+
+
+void* DeformTransfer::creator()
+{
+    return new DeformTransfer;
 }
 
-MStatus initializePlugin(MObject obj) {
-    MFnPlugin plugin(obj, "Carlos Monteagudo", "1.0", "Any");
-    MStatus status = plugin.registerCommand("deformTransfer", DeformTransfer::creator);
-    CHECK_MSTATUS_AND_RETURN_IT(status);
-    return status;
+
+MStatus DeformTransfer::initialize()
+{
+    // TODO: initialize attributes and plugs
+    return MStatus::kSuccess;
 }
 
-MStatus uninitializePlugin(MObject obj) {
+
+MStatus DeformTransfer::deform(
+        MDataBlock& block,
+        MItGeometry& iter,
+        const MMatrix& mat,
+        unsigned int multiIndex)
+{
+    MStatus returnStatus;
+    // TODO: implement the deformer itself
+    return returnStatus;
+}
+
+
+MStatus DeformTransfer::accessoryNodeSetup(MDagModifier& cmd)
+{
+    MStatus result;
+    // TODO (optional): implement creation of dependent and additional nodes of this deformer
+    return result;
+}
+
+
+MStatus initializePlugin(MObject obj)
+{
+    MStatus result;
+    MFnPlugin plugin(
+            obj,
+            "Carlos Monteagudo",
+            "1.0",
+            "Any");
+    result = plugin.registerNode(
+            "deformTransfer",
+            DeformTransfer::id,
+            DeformTransfer::creator,
+            DeformTransfer::initialize,
+            MPxNode::kDeformerNode);
+    return result;
+}
+
+
+MStatus uninitializePlugin(MObject obj)
+{
+    MStatus result;
     MFnPlugin plugin(obj);
-    MStatus status = plugin.deregisterCommand("DeformTransfer");
-    CHECK_MSTATUS_AND_RETURN_IT(status);
-    return status;
+    result = plugin.deregisterNode(DeformTransfer::id);
+    return result;
 }
