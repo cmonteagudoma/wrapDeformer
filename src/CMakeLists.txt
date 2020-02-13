@@ -1,7 +1,11 @@
 set(SOURCE_FILES
-        deformTransfer.cpp
-        deformTransfer.h
-        )
+        wrapDeformer.cpp
+        wrapDeformer.hpp
+        barycentricData.hpp
+        barycentricData.cpp
+        alias.hpp
+        logUtils.hpp)
+
 
 find_package(Maya REQUIRED)
 include_directories(${MAYA_INCLUDE_DIR})
@@ -15,6 +19,8 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
+
+include_directories(${EIGEN_INCLUDE_DIR})
 
 MAYA_PLUGIN(${PROJECT_NAME})
 install(TARGETS ${PROJECT_NAME} ${MAYA_TARGET_TYPE} DESTINATION plug-ins)
