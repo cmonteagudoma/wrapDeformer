@@ -38,7 +38,7 @@ public:
      */
     static MStatus initialize();
 
-    /** Deform the point with a squash algorithm
+    /** Deform the mesh applying a wrap algorithm based on barycentric coordinates
      *
      * @param block                 the data block of the node
      * @param iter                  an iterator for the geometry to be deformed
