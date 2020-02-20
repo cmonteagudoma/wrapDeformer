@@ -68,22 +68,6 @@ public:
 
 private:
 
-    /** Return the MObject instance of the geometry connected at the given index of the input data block
-     *
-     * @param block     the data block of the node
-     * @param geoIdx    index in the data block array
-     * @return          geometry object
-     */
-    static MObject getInputGeometry(MDataBlock& block, unsigned int geoIdx);
-
-    /** Return the closest point on the given mesh from the given source point
-     *
-     * @param sourcePoint       the point from the ray will be traced
-     * @param meshIntersector   the mesh intersector instance
-     * @return                  the point on the given mesh closest to the given source
-     */
-    MPointOnMesh getClosestPoint(const MPoint& sourcePoint, const MMeshIntersector& meshIntersector) const;
-
     /** Resolve the projection of a BarycentricData instance using the given point positions
      *
      * @param points                array of point positions

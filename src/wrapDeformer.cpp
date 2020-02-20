@@ -86,7 +86,9 @@ MStatus WrapDeformer::deform(
     }
 
     // Get input geometry data
-    MObject inMeshObj = getInputGeometry(block, multiIndex);
+    MArrayDataHandle inputArray = block.outputArrayValue(input);
+    inputArray.jumpToElement(multiIndex);
+    MObject inMeshObj = inputArray.outputValue().child(inputGeom).asMesh();
     MFnMesh inMeshFn(inMeshObj);
     MFloatPointArray points;
     inMeshFn.getPoints(points, MSpace::kWorld);
@@ -104,7 +106,7 @@ MStatus WrapDeformer::deform(
         // Clear matrices
         mMatrices.clear();
         mMatrices.resize(points.length());
-        // Clear matrices
+        // Clear relative positions
         mRelativePositions.clear();
         mRelativePositions.resize(points.length());
 
@@ -123,7 +125,8 @@ MStatus WrapDeformer::deform(
             vIter.getNormal(thisNormal);
 
             // Find closest point on mesh and its normal
-            MPointOnMesh pointOnMesh = getClosestPoint(thisPoint, targetMeshIntersector);
+            MPointOnMesh pointOnMesh;
+            targetMeshIntersector.getClosestPoint(thisPoint, pointOnMesh, 100.0f);
             MPoint closestPoint = pointOnMesh.getPoint();
             MFloatVector closestPointNormal = pointOnMesh.getNormal();
 
@@ -202,23 +205,6 @@ MStatus WrapDeformer::deform(
     // Update geometry and return
     inMeshFn.setPoints(points, MSpace::kWorld);
     return rStatus;
-}
-
-
-MObject WrapDeformer::getInputGeometry(MDataBlock& block, unsigned int geoIdx)
-{
-    MArrayDataHandle inputArray = block.outputArrayValue(input);
-    inputArray.jumpToElement(geoIdx);
-    MObject inputObj = inputArray.outputValue().child(inputGeom).asMesh();
-    return inputObj;
-}
-
-
-MPointOnMesh WrapDeformer::getClosestPoint(const MPoint& sourcePoint, const MMeshIntersector& meshIntersector) const
-{
-    MPointOnMesh pointOnMesh;
-    meshIntersector.getClosestPoint(sourcePoint, pointOnMesh, 100.0f);
-    return pointOnMesh;
 }
 
 
