@@ -10,7 +10,7 @@
 #include <maya/MFloatArray.h>
 
 #include "barycentricData.hpp"
-#include "alias.hpp"
+#include "types.hpp"
 
 
 class WrapDeformer : public MPxDeformerNode
@@ -82,7 +82,15 @@ private:
      * @param meshIntersector   the mesh intersector instance
      * @return                  the point on the given mesh closest to the given source
      */
-    MPointOnMesh getClosestPoint(const MPoint &sourcePoint, const MMeshIntersector &meshIntersector) const;
+    MPointOnMesh getClosestPoint(const MPoint& sourcePoint, const MMeshIntersector& meshIntersector) const;
+
+    /** Resolve the projection of a BarycentricData instance using the given point positions
+     *
+     * @param points                array of point positions
+     * @param barycentricData       object with barycentric data, coordinates and vertex indices
+     * @return                      the projected point
+     */
+    inline f3 getBarycentricProjection(const MFloatPointArray& points, const BarycentricData& barycentricData) const;
 
 };
 

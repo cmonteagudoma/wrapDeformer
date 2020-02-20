@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "alias.hpp"
+#include "types.hpp"
 
 
 class BarycentricData
@@ -12,7 +12,7 @@ class BarycentricData
 public:
 
     BarycentricData();
-    BarycentricData(int polygonIndex, int triangleIndex, IntVector &vertexIndexList, float u, float v, float w);
+    BarycentricData(int polygonIndex, int triangleIndex, IntVector& vertexIndexList, f32 u, f32 v, f32 w);
     ~BarycentricData();
 
     /** Set mPolygonIndex member
@@ -31,19 +31,19 @@ public:
      *
      * @param vertexIndexList   list of indexes to set
      */
-    void setVertexIndices(IntVector &vertexIndexList);
+    void setVertexIndices(IntVector& vertexIndexList);
     
     /** Set mU member
      *
-     * @param u     float value to set
+     * @param u     f32 value to set
      */
-    void setU(float u);
+    void setU(f32 u);
     
     /** Set mV member
      *
-     * @param v     float value to set
+     * @param v     f32 value to set
      */
-    void setV(float v);
+    void setV(f32 v);
     
     /** Set mW member using mU and mV values
      *
@@ -72,19 +72,19 @@ public:
      *
      * @return  the value of coordinate mU
      */
-    float getU() const;
+    f32 getU() const;
     
     /** Get mV member value
      *
      * @return  the value of coordinate mV
      */
-    float getV() const;
+    f32 getV() const;
     
     /** Get mW member value
      *
      * @return  the value of coordinate mW
      */
-    float getW() const;
+    f32 getW() const;
 
     /** Calculate the position of the (u, v, w) barycentric point in a triangle with the given points as vertices
      *
@@ -93,7 +93,7 @@ public:
      * @param c     third vertex of the triangle
      * @return      the point projected on the barycentric coordinates
      */
-    f3 getBarycentricProjection(f3 &a, f3 &b, f3 &c) const;
+    f3 getBarycentricProjection(f3& a, f3& b, f3& c) const;
 
 private:
 
@@ -102,9 +102,9 @@ private:
      */
     int mPolygonIndex;
     int mTriangleIndex;
-    float mU;
-    float mV;
-    float mW;
+    f32 mU;
+    f32 mV;
+    f32 mW;
     IntVector mVertexIndices;
 };
 

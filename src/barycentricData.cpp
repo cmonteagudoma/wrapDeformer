@@ -7,10 +7,10 @@ BarycentricData::BarycentricData() = default;;
 BarycentricData::BarycentricData(
         int polygonIndex,
         int triangleIndex,
-        IntVector &vertexIndexList,
-        float u,
-        float v,
-        float w) :
+        IntVector& vertexIndexList,
+        f32 u,
+        f32 v,
+        f32 w) :
         mPolygonIndex(polygonIndex),
         mTriangleIndex(triangleIndex),
         mVertexIndices(vertexIndexList),
@@ -37,19 +37,19 @@ void BarycentricData::setTriangleIndex(int triangleIndex)
 }
 
 
-void BarycentricData::setVertexIndices(IntVector &vertexIndexList)
+void BarycentricData::setVertexIndices(IntVector& vertexIndexList)
 {
     mVertexIndices = vertexIndexList;
 }
 
 
-void BarycentricData::setU(float u)
+void BarycentricData::setU(f32 u)
 {
     mU = u;
 }
 
 
-void BarycentricData::setV(float v)
+void BarycentricData::setV(f32 v)
 {
     mV = v;
 }
@@ -79,25 +79,25 @@ IntVector BarycentricData::getVertexIndices() const
 }
 
 
-float BarycentricData::getU() const
+f32 BarycentricData::getU() const
 {
     return mU;
 }
 
 
-float BarycentricData::getV() const
+f32 BarycentricData::getV() const
 {
     return mV;
 }
 
 
-float BarycentricData::getW() const
+f32 BarycentricData::getW() const
 {
     return mW;
 }
 
 
-f3 BarycentricData::getBarycentricProjection(f3 &a, f3 &b, f3 &c) const
+f3 BarycentricData::getBarycentricProjection(f3& a, f3& b, f3& c) const
 {
     f3 projection = a*mU + b*mV + c*mW;
     return projection;

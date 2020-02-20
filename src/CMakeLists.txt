@@ -3,8 +3,7 @@ set(SOURCE_FILES
         wrapDeformer.hpp
         barycentricData.hpp
         barycentricData.cpp
-        alias.hpp
-        logUtils.hpp)
+        types.hpp)
 
 
 find_package(Maya REQUIRED)

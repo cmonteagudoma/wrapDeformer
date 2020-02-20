@@ -1,4 +1,3 @@
-#include <omp.h>
 #include <maya/MFnPlugin.h>
 #include <maya/MFnMesh.h>
 #include <maya/MItMeshVertex.h>
@@ -77,7 +76,7 @@ MStatus WrapDeformer::deform(
 {
     MStatus rStatus;
     // Get node plugs
-    float envelopeValue = block.inputValue(envelope).asFloat();
+    f32 envelopeValue = block.inputValue(envelope).asFloat();
     MObject targetMeshObj = block.inputValue(WrapDeformer::aTargetMesh).asMesh();
 
     // Quick exit: no targetMesh or envelope is zero
@@ -130,8 +129,8 @@ MStatus WrapDeformer::deform(
 
             // Build BarycentricData instance
             // Get values of u, v coordinates, polygon id and triangle in polygon id
-            float u = 0.0f;
-            float v = 0.0f;
+            f32 u = 0.0f;
+            f32 v = 0.0f;
             pointOnMesh.getBarycentricCoords(u, v);
             int closestTriangleIndex = pointOnMesh.triangleIndex();
             int closestPolygonIndex = pointOnMesh.faceIndex();
@@ -150,21 +149,17 @@ MStatus WrapDeformer::deform(
             mBarycentricData[vIter.index()] = barycentricData;
 
             // Compute transformation matrix from the barycentric projection
-            MFloatPoint aTargetPoint = targetPoints[vertexIndices[0]];
-            f3 a = f3{aTargetPoint.x, aTargetPoint.y, aTargetPoint.z};
-            MFloatPoint bTargetPoint = targetPoints[vertexIndices[1]];
-            f3 b = f3{bTargetPoint.x, bTargetPoint.y, bTargetPoint.z};
-            MFloatPoint cTargetPoint = targetPoints[vertexIndices[2]];
-            f3 c = f3{cTargetPoint.x, cTargetPoint.y, cTargetPoint.z};
-            f3 barycentricProjection = barycentricData.getBarycentricProjection(a, b, c);
+            f3 barycentricProjection = getBarycentricProjection(targetPoints, barycentricData);
             // Normal
             f3 normal = f3{closestPointNormal.x, closestPointNormal.y, closestPointNormal.z};
             // Tangent (ensure that tangent vector length is not zero)
-            f3 pointToTangent = a;
+            MFloatPoint aTargetPoint = targetPoints[vertexIndices[0]];
+            f3 pointToTangent = f3{aTargetPoint.x, aTargetPoint.y, aTargetPoint.z};
             f3 tangentVector = pointToTangent - barycentricProjection;
             if (tangentVector.norm() < 1e-3)
             {
-                pointToTangent = b;
+                MFloatPoint bTargetPoint = points[vertexIndices[1]];
+                pointToTangent = f3{bTargetPoint.x, bTargetPoint.y, bTargetPoint.z};
             }
             f3 tangent = (pointToTangent - barycentricProjection).normalized();
             // Binormal
@@ -178,7 +173,7 @@ MStatus WrapDeformer::deform(
 
             // Compute relative position of this point to the barycentric projection at rest
             Matrix inverseMatrix = matrix.inverse();
-            f3 parsedPoint = f3{(float)thisPoint.x, (float)thisPoint.y, (float)thisPoint.z};
+            f3 parsedPoint = f3{(f32)thisPoint.x, (f32)thisPoint.y, (f32)thisPoint.z};
             f3 vectorInWorldSpace = parsedPoint - barycentricProjection;
             mRelativePositions[vIter.index()] = inverseMatrix * vectorInWorldSpace;
 
@@ -193,19 +188,11 @@ MStatus WrapDeformer::deform(
     }
 
     // Compute and apply the deformation at every single Node Graph evaluation
-#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int idx = 0; idx < points.length(); ++ idx)
     {
         // Compute goal position of this point using barycentric coordinates
-        BarycentricData barycentricData = mBarycentricData[idx];
-        IntVector vertexIndices = barycentricData.getVertexIndices();
-        MFloatPoint aTargetPoint = targetPoints[vertexIndices[0]];
-        f3 a = f3{aTargetPoint.x, aTargetPoint.y, aTargetPoint.z};
-        MFloatPoint bTargetPoint = targetPoints[vertexIndices[1]];
-        f3 b = f3{bTargetPoint.x, bTargetPoint.y, bTargetPoint.z};
-        MFloatPoint cTargetPoint = targetPoints[vertexIndices[2]];
-        f3 c = f3{cTargetPoint.x, cTargetPoint.y, cTargetPoint.z};
-        f3 barycentricProjection = barycentricData.getBarycentricProjection(a, b, c);
+        f3 barycentricProjection = getBarycentricProjection(targetPoints, mBarycentricData[idx]);
         f3 goalPoint = (mMatrices[idx] * mRelativePositions[idx]) + barycentricProjection;
         MPoint goalPointWorldSpace = MPoint(goalPoint[0], goalPoint[1], goalPoint[2]) * localToWorldMatrix;
         MVector weightedDistanceVector = goalPointWorldSpace - MVector(points[idx]);
@@ -227,11 +214,25 @@ MObject WrapDeformer::getInputGeometry(MDataBlock& block, unsigned int geoIdx)
 }
 
 
-MPointOnMesh WrapDeformer::getClosestPoint(const MPoint &sourcePoint, const MMeshIntersector &meshIntersector) const
+MPointOnMesh WrapDeformer::getClosestPoint(const MPoint& sourcePoint, const MMeshIntersector& meshIntersector) const
 {
     MPointOnMesh pointOnMesh;
     meshIntersector.getClosestPoint(sourcePoint, pointOnMesh, 100.0f);
     return pointOnMesh;
+}
+
+
+inline f3 WrapDeformer::getBarycentricProjection(const MFloatPointArray& points, const BarycentricData& barycentricData) const
+{
+    IntVector vertexIndices = barycentricData.getVertexIndices();
+    MFloatPoint aTargetPoint = points[vertexIndices[0]];
+    f3 a = f3{aTargetPoint.x, aTargetPoint.y, aTargetPoint.z};
+    MFloatPoint bTargetPoint = points[vertexIndices[1]];
+    f3 b = f3{bTargetPoint.x, bTargetPoint.y, bTargetPoint.z};
+    MFloatPoint cTargetPoint = points[vertexIndices[2]];
+    f3 c = f3{cTargetPoint.x, cTargetPoint.y, cTargetPoint.z};
+    f3 barycentricProjection = barycentricData.getBarycentricProjection(a, b, c);
+    return barycentricProjection;
 }
 
 
